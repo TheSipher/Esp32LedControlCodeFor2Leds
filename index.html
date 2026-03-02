@@ -1,51 +1,88 @@
 <!DOCTYPE html>
+
 <html>
 
 <head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>ESP32 LED Control</title>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <style>
 
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+}
+
 body{
-font-family: Arial;
+font-family: Arial, sans-serif;
 background:#0f172a;
 color:white;
-text-align:center;
-padding-top:60px;
+min-height:100vh;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+padding:20px;
 }
+
+/* TITLE */
 
 h1{
 margin-bottom:40px;
+font-size:32px;
+text-align:center;
 }
 
+/* DEVICE GRID */
+
 .container{
-display:flex;
-justify-content:center;
-gap:80px;
+width:100%;
+max-width:500px;
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:20px;
 }
+
+/* CARD */
 
 .card{
 background:#1e293b;
-padding:30px;
-border-radius:15px;
-width:200px;
-box-shadow:0 0 20px rgba(0,0,0,0.3);
+padding:30px 20px;
+border-radius:18px;
+box-shadow:0 15px 40px rgba(0,0,0,0.35);
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:12px;
 }
+
+/* LED NAME */
+
+.card h2{
+font-size:22px;
+}
+
+/* STATUS */
 
 .status{
 font-size:18px;
-margin-top:10px;
-margin-bottom:15px;
+font-weight:bold;
 }
+
+/* SWITCH */
 
 .switch{
 position:relative;
 display:inline-block;
-width:90px;
-height:45px;
+width:100px;
+height:50px;
 }
 
 .switch input{
@@ -60,19 +97,19 @@ left:0;
 right:0;
 bottom:0;
 background-color:#555;
-transition:.4s;
-border-radius:45px;
+transition:.35s;
+border-radius:50px;
 }
 
 .slider:before{
 position:absolute;
 content:"";
-height:35px;
-width:35px;
-left:5px;
-bottom:5px;
+height:38px;
+width:38px;
+left:6px;
+bottom:6px;
 background-color:white;
-transition:.4s;
+transition:.35s;
 border-radius:50%;
 }
 
@@ -81,7 +118,26 @@ background-color:#22c55e;
 }
 
 input:checked + .slider:before{
-transform:translateX(45px);
+transform:translateX(50px);
+}
+
+/* MOBILE */
+
+@media (max-width:600px){
+
+.container{
+grid-template-columns:1fr;
+max-width:350px;
+}
+
+.card{
+padding:35px 20px;
+}
+
+h1{
+font-size:28px;
+}
+
 }
 
 </style>
@@ -95,23 +151,29 @@ transform:translateX(45px);
 <div class="container">
 
 <div class="card">
+
 <h2>LED 1</h2>
+
 <div class="status" id="status1">OFF</div>
 
 <label class="switch">
 <input type="checkbox" id="toggle1" onchange="toggleLED(1)">
 <span class="slider"></span>
 </label>
+
 </div>
 
 <div class="card">
+
 <h2>LED 2</h2>
+
 <div class="status" id="status2">OFF</div>
 
 <label class="switch">
 <input type="checkbox" id="toggle2" onchange="toggleLED(2)">
 <span class="slider"></span>
 </label>
+
 </div>
 
 </div>
