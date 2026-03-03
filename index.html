@@ -1,184 +1,177 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Smart Home Controller</title>
+<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>ESP32 LED Control</title><script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script><script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script><style>
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<style>
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+}
 
 body{
-    margin:0;
-    font-family: Arial, Helvetica, sans-serif;
-    background: linear-gradient(135deg,#1e3c72,#2a5298);
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
+font-family: Arial, sans-serif;
+background:#0f172a;
+color:white;
+min-height:100vh;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+padding:20px;
 }
 
-/* Main Card */
+/* TITLE */
+
+h1{
+margin-bottom:40px;
+font-size:32px;
+text-align:center;
+}
+
+/* DEVICE GRID */
+
 .container{
-    background:white;
-    width:90%;
-    max-width:420px;
-    padding:35px;
-    border-radius:18px;
-    box-shadow:0 10px 30px rgba(0,0,0,0.25);
-    text-align:center;
+width:100%;
+max-width:500px;
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:20px;
 }
 
-/* Title */
-.title{
-    font-size:32px;
-    font-weight:bold;
-    margin-bottom:30px;
-    color:#333;
+/* CARD */
+
+.card{
+background:#1e293b;
+padding:30px 20px;
+border-radius:18px;
+box-shadow:0 15px 40px rgba(0,0,0,0.35);
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:12px;
 }
 
-/* Device Row */
-.device{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin:25px 0;
-    padding:18px;
-    border-radius:12px;
-    background:#f4f6fb;
+/* LED NAME */
+
+.card h2{
+font-size:22px;
 }
 
-/* Device Name */
-.device span{
-    font-size:24px;
-    font-weight:600;
+/* STATUS */
+
+.status{
+font-size:18px;
+font-weight:bold;
 }
 
-/* Toggle Switch */
+/* SWITCH */
+
 .switch{
-    position:relative;
-    display:inline-block;
-    width:70px;
-    height:40px;
+position:relative;
+display:inline-block;
+width:100px;
+height:50px;
 }
 
 .switch input{
-    opacity:0;
-    width:0;
-    height:0;
+display:none;
 }
 
 .slider{
-    position:absolute;
-    cursor:pointer;
-    top:0;
-    left:0;
-    right:0;
-    bottom:0;
-    background-color:#ccc;
-    transition:.4s;
-    border-radius:40px;
+position:absolute;
+cursor:pointer;
+top:0;
+left:0;
+right:0;
+bottom:0;
+background-color:#555;
+transition:.35s;
+border-radius:50px;
 }
 
 .slider:before{
-    position:absolute;
-    content:"";
-    height:32px;
-    width:32px;
-    left:4px;
-    bottom:4px;
-    background:white;
-    transition:.4s;
-    border-radius:50%;
+position:absolute;
+content:"";
+height:38px;
+width:38px;
+left:6px;
+bottom:6px;
+background-color:white;
+transition:.35s;
+border-radius:50%;
 }
 
 input:checked + .slider{
-    background:#4CAF50;
+background-color:#22c55e;
 }
 
 input:checked + .slider:before{
-    transform:translateX(30px);
+transform:translateX(50px);
 }
 
-/* Footer */
-.footer{
-    margin-top:20px;
-    font-size:14px;
-    color:#777;
+/* MOBILE */
+
+@media (max-width:600px){
+
+.container{
+grid-template-columns:1fr;
+max-width:350px;
 }
 
-</style>
-</head>
+.card{
+padding:35px 20px;
+}
 
-<body>
+h1{
+font-size:28px;
+}
 
-<div class="container">
+}
 
-<div class="title">Smart Home</div>
-
-<div class="device">
-<span>Light</span>
-
-<label class="switch">
-<input type="checkbox" id="led1">
+</style></head><body><h1>ESP32 LED Control</h1><div class="container"><div class="card"><h2>LED 1</h2><div class="status" id="status1">OFF</div><label class="switch">
+<input type="checkbox" id="toggle1" onchange="toggleLED(1)">
 <span class="slider"></span>
-</label>
-
-</div>
-
-
-<div class="device">
-<span>Fan</span>
-
-<label class="switch">
-<input type="checkbox" id="led2">
+</label></div><div class="card"><h2>LED 2</h2><div class="status" id="status2">OFF</div><label class="switch">
+<input type="checkbox" id="toggle2" onchange="toggleLED(2)">
 <span class="slider"></span>
-</label>
+</label></div></div><script>
 
-</div>
-
-<div class="footer">
-ESP32 Firebase Controller
-</div>
-
-</div>
-
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBmBjAhMNeczOxsetv1NCe6CQxINw01_ZY",
-  databaseURL: "https://esp32-led-control-c30ee-default-rtdb.asia-southeast1.firebasedatabase.app/"
+var firebaseConfig = {
+apiKey: "AIzaSyBmBjAhMNeczOxsetv1NCe6CQxINw01_ZY",
+databaseURL: "https://esp32-led-control-c30ee-default-rtdb.asia-southeast1.firebasedatabase.app/"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+firebase.initializeApp(firebaseConfig);
 
-const led1 = document.getElementById("led1");
-const led2 = document.getElementById("led2");
+var db = firebase.database();
 
-/* Send Data */
+function toggleLED(num){
 
-led1.addEventListener("change",()=>{
-    set(ref(db,"led1"),led1.checked ? 1 : 0);
+var toggle = document.getElementById("toggle"+num);
+
+if(toggle.checked){
+db.ref("led"+num).set(1);
+}
+else{
+db.ref("led"+num).set(0);
+}
+
+}
+
+db.ref("led1").on("value", function(snapshot){
+
+var val = snapshot.val();
+
+document.getElementById("toggle1").checked = val;
+document.getElementById("status1").innerText = val ? "ON" : "OFF";
+
 });
 
-led2.addEventListener("change",()=>{
-    set(ref(db,"led2"),led2.checked ? 1 : 0);
+db.ref("led2").on("value", function(snapshot){
+
+var val = snapshot.val();
+
+document.getElementById("toggle2").checked = val;
+document.getElementById("status2").innerText = val ? "ON" : "OFF";
+
 });
 
-/* Read Data */
-
-onValue(ref(db,"led1"),(snapshot)=>{
-    led1.checked = snapshot.val()==1;
-});
-
-onValue(ref(db,"led2"),(snapshot)=>{
-    led2.checked = snapshot.val()==1;
-});
-
-</script>
-
-</body>
-</html>
+</script></body></html>
